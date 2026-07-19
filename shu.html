@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>署·平衡 — 人与自然兄弟契约</title>
+<style>
+:root{
+  --red:#C41A1A; --gold:#D4A017; --green:#2D7D46; --ink:#1A1A1A; --paper:#F5F0E1;
+  --paper2:#EFE7D2; --serif:"Noto Serif SC","STKaiti","KaiTi","STSong",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:var(--serif); color:var(--ink); background:#E8DFC8;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='0.06'/></feComponentTransfer></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+  display:flex; justify-content:center; min-height:100vh; min-height:100dvh;
+}
+.num{font-family:ui-sans-serif,system-ui,sans-serif;}
+#app{
+  width:100%; max-width:480px; min-height:100vh; min-height:100dvh; position:relative;
+  background:var(--paper);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='0.05'/></feComponentTransfer></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+  box-shadow:0 0 40px rgba(0,0,0,.18); overflow:hidden;
+}
+.screen{position:absolute; inset:0; display:none; flex-direction:column; overflow-y:auto;}
+.screen.on{display:flex;}
+.glyph-img{display:inline-block; vertical-align:middle;}
+.btn{
+  display:block; width:100%; border:none; cursor:pointer; font-family:var(--serif);
+  background:var(--red); color:#fff; border-radius:10px; padding:13px 16px; font-size:17px;
+  letter-spacing:2px; box-shadow:0 3px 0 #8F1010, 0 4px 10px rgba(0,0,0,.15);
+  transition:transform .12s, box-shadow .12s;
+}
+.btn:active{transform:translateY(2px); box-shadow:0 1px 0 #8F1010;}
+.btn.ghost{background:transparent; color:var(--ink); border:1.5px solid #B8A97F; box-shadow:none; font-size:15px;}
+.btn[disabled]{background:#B9B2A0; box-shadow:none; cursor:not-allowed; color:#F0EBDD;}
+/* ===== 启动页 ===== */
+#scr-boot{align-items:center; justify-content:center; text-align:center;}
+.corner-g{position:absolute; width:52px; opacity:.16;}
+.corner-g.tl{top:18px;left:18px;} .corner-g.tr{top:18px;right:18px;}
+.corner-g.bl{bottom:18px;left:18px;} .corner-g.br{bottom:18px;right:18px;}
+.boot-title{font-size:52px; letter-spacing:8px; display:flex; align-items:center; gap:6px; justify-content:center;}
+.boot-title img{width:58px; height:58px; opacity:.9;}
+.boot-sub{margin-top:14px; font-size:15px; letter-spacing:6px; color:#6B5D3F;}
+.boot-bar{margin-top:44px; width:200px; height:6px; background:#DED3B8; border-radius:3px; overflow:hidden;}
+.boot-bar i{display:block; height:100%; width:0; background:var(--red); border-radius:3px; transition:width .18s linear;}
+.boot-tip{margin-top:12px; font-size:12px; color:#9A8C6B; letter-spacing:2px;}
+/* ===== 主菜单 ===== */
+#scr-menu{align-items:center; padding:56px 28px 0;}
+.menu-title{font-size:40px; letter-spacing:6px; display:flex; align-items:center; gap:4px;}
+.menu-title img{width:44px; height:44px; opacity:.9;}
+.menu-sub{margin:10px 0 8px; font-size:13px; letter-spacing:5px; color:#6B5D3F;}
+.menu-best{font-size:12px; color:#9A8C6B; min-height:18px; margin-bottom:26px;}
+.menu-btns{width:100%; max-width:280px; display:flex; flex-direction:column; gap:14px;}
+.menu-scroll{margin-top:auto; width:100%; overflow:hidden; padding:18px 0 22px; -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent); mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);}
+.mq-track{display:flex; gap:44px; width:max-content; animation:mq 22s linear infinite;}
+.mq-track img{width:40px; height:40px; opacity:.55;}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ===== 游戏主界面 ===== */
+#scr-game{padding:10px 14px 96px;}
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:4px 2px 10px;}
+.topbar .round{font-size:14px; letter-spacing:1px;}
+.topbar .season{font-size:14px;}
+.icon-btn{background:none; border:1px solid #B8A97F; border-radius:8px; width:32px; height:32px; font-size:15px; cursor:pointer; color:var(--ink);}
+.bars{display:flex; flex-direction:column; gap:8px; margin-bottom:10px;}
+.bar-row{display:flex; align-items:center; gap:8px;}
+.bar-label{width:58px; font-size:13px; flex:none;}
+.bar-wrap{flex:1; height:14px; background:#DED3B8; border-radius:7px; overflow:hidden; position:relative;}
+.bar-fill{height:100%; border-radius:7px; transition:width .5s ease;}
+.bar-fill.pros{background:linear-gradient(90deg,#D4A017,#E8862A);}
+.bar-fill.anger{background:linear-gradient(90deg,#2D7D46,#C41A1A);}
+.bar-val{width:30px; font-size:13px; text-align:right; flex:none;}
+.bar-status{font-size:11px; color:#8A7C5C; margin:-4px 0 0 66px;}
+.res-row{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0 6px;}
+.res-cell{background:var(--paper2); border:1px solid #D8CCAC; border-radius:9px; padding:6px 4px 7px; text-align:center;}
+.res-cell .rn{font-size:12px;}
+.res-cell .rv{font-size:16px; margin:1px 0 3px;}
+.res-mini{height:4px; background:#D8CCAC; border-radius:2px; overflow:hidden; margin:0 6px;}
+.res-mini i{display:block; height:100%; background:var(--green); border-radius:2px; transition:width .4s;}
+.culture-line{font-size:12px; color:#6B5D3F; margin:2px 2px 10px; display:flex; justify-content:space-between;}
+.culture-line .unlocked{color:var(--red);}
+/* 事件卡片 */
+.ev-card{background:#FBF7EA; border:1px solid #D8CCAC; border-radius:14px; padding:16px 16px 14px; box-shadow:0 3px 12px rgba(60,45,15,.12); position:relative;}
+.ev-card::before{content:""; position:absolute; inset:5px; border:1px dashed #E2D7B8; border-radius:10px; pointer-events:none;}
+.ev-tag{font-size:11px; color:var(--red); letter-spacing:2px; margin-bottom:4px;}
+.ev-title{font-size:19px; letter-spacing:2px; margin-bottom:8px;}
+.ev-desc{font-size:14px; line-height:1.85; color:#3A332A; margin-bottom:12px; text-align:justify;}
+.ev-opt{width:100%; text-align:left; background:#F3ECDA; border:1.5px solid #C9BA90; border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-family:var(--serif); transition:background .15s,border-color .15s;}
+.ev-opt:active{background:#EAE0C6;}
+.ev-opt .ot{font-size:15px;}
+.ev-opt .op{font-size:11px; color:#8A7C5C; margin-top:3px; font-family:ui-sans-serif,system-ui,sans-serif;}
+.ev-note-btn{background:none; border:none; color:#6B5D3F; font-size:12px; cursor:pointer; font-family:var(--serif); text-decoration:underline; text-underline-offset:3px; padding:2px 0;}
+/* 祭署按钮 */
+#ritual-btn{
+  position:absolute; left:50%; transform:translateX(-50%); bottom:18px; width:64px; height:64px;
+  border-radius:50%; border:3px solid #E8C85A; background:radial-gradient(circle at 35% 30%, #D8352A, var(--red) 70%);
+  color:#fff; font-size:26px; font-family:var(--serif); cursor:pointer; z-index:20;
+  box-shadow:0 4px 14px rgba(196,26,26,.45); display:flex; align-items:center; justify-content:center; flex-direction:column;
+}
+#ritual-btn small{font-size:9px; letter-spacing:0; margin-top:-2px; font-family:ui-sans-serif,system-ui,sans-serif;}
+#ritual-btn[disabled]{background:#A39B88; border-color:#C9C2B0; box-shadow:none; cursor:not-allowed;}
+/* 浮动数值 */
+#floats{position:absolute; inset:0; pointer-events:none; z-index:30; overflow:hidden;}
+.float-n{position:absolute; font-size:18px; font-weight:700; font-family:ui-sans-serif,system-ui,sans-serif; animation:fup 1.1s ease-out forwards; text-shadow:0 1px 2px rgba(255,255,255,.7);}
+@keyframes fup{from{opacity:1; transform:translateY(0)}to{opacity:0; transform:translateY(-46px)}}
+/* 怒气光晕 */
+#rage{position:absolute; inset:0; pointer-events:none; z-index:15; opacity:0; transition:opacity .6s;
+  box-shadow:inset 0 0 46px 14px rgba(196,26,26,.55);}
+#rage.lv1{opacity:.55; animation:ragep 2.2s ease-in-out infinite;}
+#rage.lv2{opacity:.95; animation:ragep 1.1s ease-in-out infinite;}
+@keyframes ragep{0%,100%{filter:brightness(.85)}50%{filter:brightness(1.25)}}
+/* ===== 遮罩：回合过渡 ===== */
+#overlay{position:absolute; inset:0; z-index:40; display:none; align-items:center; justify-content:center; flex-direction:column;
+  background:rgba(26,20,10,.82); color:var(--paper); text-align:center;}
+#overlay.on{display:flex;}
+#overlay .ov-season{font-size:34px; letter-spacing:4px; margin-bottom:14px;}
+#overlay .ov-d{font-size:16px; margin:3px 0; font-family:ui-sans-serif,system-ui,sans-serif;}
+#overlay .ov-note{font-size:12px; color:#D8CCAC; margin-top:10px; max-width:300px; line-height:1.7;}
+/* ===== 弹窗通用 ===== */
+.modal-mask{position:absolute; inset:0; z-index:50; background:rgba(26,20,10,.55); display:none; align-items:center; justify-content:center; padding:24px;}
+.modal-mask.on{display:flex;}
+.modal{width:100%; max-width:360px; border-radius:14px; padding:20px; max-height:80%; overflow-y:auto;}
+.modal.paper{background:#FBF7EA; border:1px solid #C9BA90;}
+.modal.ritual{background:linear-gradient(160deg,#5A0E0E,#3E0909); border:2px solid #D4A017; color:#F5F0E1;}
+.modal h3{letter-spacing:3px; margin-bottom:10px; font-size:17px;}
+.modal .note-body{font-size:14px; line-height:1.9; text-align:justify; margin-bottom:14px;}
+.ritual-glyph{display:block; margin:0 auto 10px; width:64px; height:64px; filter:invert(1) brightness(1.6);}
+.rit-opt{display:block; width:100%; text-align:left; background:rgba(245,240,225,.08); border:1.5px solid #A8842F; color:#F5F0E1; border-radius:10px; padding:10px 12px; margin-bottom:9px; cursor:pointer; font-family:var(--serif);}
+.rit-opt.sel{background:rgba(212,160,23,.25); border-color:#E8C85A;}
+.rit-opt.na{opacity:.45; cursor:not-allowed;}
+.rit-opt .ot{font-size:15px;}
+.rit-opt .op{font-size:11px; color:#E0CFA0; margin-top:3px; font-family:ui-sans-serif,system-ui,sans-serif;}
+.rit-actions{display:flex; gap:10px; margin-top:6px;}
+.rit-actions .btn{flex:1; padding:11px;}
+/* 仪式动画 */
+#ritual-anim{position:absolute; inset:0; z-index:60; background:rgba(30,8,8,.88); display:none; align-items:center; justify-content:center; flex-direction:column;}
+#ritual-anim.on{display:flex;}
+#ritual-anim img{width:110px; height:110px; animation:flame .45s ease-in-out infinite alternate;}
+#ritual-anim p{color:#F5F0E1; letter-spacing:4px; margin-top:18px; font-size:15px; animation:fadeout 1.5s forwards;}
+@keyframes flame{from{transform:scale(1)}to{transform:scale(1.14)}}
+@keyframes fadeout{to{opacity:0}}
+/* ===== 图鉴 ===== */
+#scr-codex{padding:14px;}
+.codex-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.codex-head h2{letter-spacing:4px; font-size:20px;}
+.codex-count{font-size:13px; color:#6B5D3F;}
+.codex-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding-bottom:20px;}
+.codex-card{background:#FBF7EA; border:1px solid #D8CCAC; border-radius:12px; padding:12px 10px; text-align:center; box-shadow:0 2px 8px rgba(60,45,15,.1);}
+.codex-card img{width:46px; height:46px; margin-bottom:6px;}
+.codex-card .cn{font-size:15px; letter-spacing:2px;}
+.codex-card .cd{font-size:11px; color:#8A7C5C; margin-top:4px; line-height:1.6;}
+.codex-card.lock{filter:grayscale(1); opacity:.45;}
+.codex-card.lock img{opacity:.5;}
+/* ===== 结局 ===== */
+#scr-ending{align-items:center; justify-content:center; text-align:center; padding:34px 28px;}
+#scr-ending.gold{background:radial-gradient(circle at 50% 30%, #F7E8BE, #EFE0B4 60%, #E7D49E);}
+#scr-ending.gray{background:radial-gradient(circle at 50% 30%, #8E8E8E, #5E5E5E 70%, #444); color:#E8E4DA;}
+#scr-ending.normal{background:radial-gradient(circle at 50% 30%, #F5F0E1, #E9E0C8 70%, #DCCFA8);}
+.end-icon{font-size:56px; margin-bottom:8px;}
+.end-icon img{width:92px; height:92px; animation:bookclose 3s ease-in-out infinite;}
+@keyframes bookclose{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.35)}}
+.end-name{font-size:30px; letter-spacing:8px; margin-bottom:6px;}
+.end-tag{font-size:12px; letter-spacing:3px; opacity:.75; margin-bottom:20px;}
+.end-desc{font-size:15px; line-height:2.05; max-width:320px; text-align:justify; margin-bottom:18px;}
+.end-proverb{font-size:17px; letter-spacing:2px; margin-bottom:34px;}
+.end-btns{width:100%; max-width:280px; display:flex; flex-direction:column; gap:12px;}
+@media (min-width:481px){ .boot-title{font-size:56px;} }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 启动页 -->
+  <section id="scr-boot" class="screen on">
+    <img class="corner-g tl" data-g="山" alt=""><img class="corner-g tr" data-g="水" alt="">
+    <img class="corner-g bl" data-g="人" alt=""><img class="corner-g br" data-g="日出" alt="">
+    <div class="boot-title"><img data-g="水" alt=""><span>署·平衡</span><img data-g="山" alt=""></div>
+    <div class="boot-sub">人与自然兄弟契约</div>
+    <div class="boot-bar"><i id="boot-fill"></i></div>
+    <div class="boot-tip">正在研墨铺纸……</div>
+  </section>
+
+  <!-- 主菜单 -->
+  <section id="scr-menu" class="screen">
+    <div class="menu-title"><img data-g="水" alt="">署·平衡<img data-g="山" alt=""></div>
+    <div class="menu-sub">人与自然兄弟契约</div>
+    <div class="menu-best" id="menu-best"></div>
+    <div class="menu-btns">
+      <button class="btn" id="btn-start">开始游戏</button>
+      <button class="btn" id="btn-continue" style="display:none;background:#8F5A12;box-shadow:0 3px 0 #6B420B,0 4px 10px rgba(0,0,0,.15);">继续游戏</button>
+      <button class="btn ghost" id="btn-codex">文化图鉴</button>
+      <button class="btn ghost" id="btn-sound">声音：开</button>
+    </div>
+    <div class="menu-scroll"><div class="mq-track" id="mq-track"></div></div>
+  </section>
+
+  <!-- 游戏主界面 -->
+  <section id="scr-game" class="screen">
+    <div class="topbar">
+      <span class="round num" id="ui-round">第 1 回合 / 共 20 回合</span>
+      <span class="season" id="ui-season">🌸 春</span>
+      <button class="icon-btn" id="btn-restart" title="重开">↻</button>
+    </div>
+    <div class="bars">
+      <div>
+        <div class="bar-row"><span class="bar-label">繁荣度</span>
+          <div class="bar-wrap"><div class="bar-fill pros" id="bar-pros"></div></div>
+          <span class="bar-val num" id="val-pros">40</span></div>
+        <div class="bar-status" id="st-pros">炊烟袅袅，村落如常</div>
+      </div>
+      <div>
+        <div class="bar-row"><span class="bar-label">署的怒气</span>
+          <div class="bar-wrap"><div class="bar-fill anger" id="bar-anger"></div></div>
+          <span class="bar-val num" id="val-anger">20</span></div>
+        <div class="bar-status" id="st-anger">山林低语，署在注视</div>
+      </div>
+    </div>
+    <div class="res-row" id="res-row"></div>
+    <div class="culture-line"><span>📜 文化传承 <b class="num" id="val-culture">0</b></span><span class="unlocked" id="ritual-hint"></span></div>
+    <div class="ev-card" id="ev-card"></div>
+    <div id="rage"></div>
+    <button id="ritual-btn" title="祭署仪式">署<small id="ritual-sub">祭祀</small></button>
+    <div id="floats"></div>
+  </section>
+
+  <!-- 回合过渡 -->
+  <div id="overlay"><div class="ov-season" id="ov-season">🌸 春 · 第1年</div><div id="ov-lines"></div><div class="ov-note" id="ov-note"></div></div>
+
+  <!-- 典籍注解弹窗 -->
+  <div class="modal-mask" id="note-mask"><div class="modal paper">
+    <h3>📖 典籍原文</h3>
+    <div class="note-body" id="note-body"></div>
+    <button class="btn ghost" id="note-close">合上经书</button>
+  </div></div>
+
+  <!-- 祭署仪式弹窗 -->
+  <div class="modal-mask" id="ritual-mask"><div class="modal ritual">
+    <img class="ritual-glyph" data-g="祈祷" alt="">
+    <h3 style="text-align:center;">祭 署 仪 式</h3>
+    <p style="font-size:12px;color:#E0CFA0;text-align:center;margin-bottom:12px;">以献祭平署怒，以虔诚续契约</p>
+    <div id="ritual-opts"></div>
+    <div class="rit-actions">
+      <button class="btn" id="ritual-go" style="background:#D4A017;box-shadow:0 3px 0 #9A7010;">举行仪式</button>
+      <button class="btn ghost" id="ritual-cancel" style="color:#F5F0E1;border-color:#A8842F;">取消</button>
+    </div>
+  </div></div>
+
+  <div id="ritual-anim"><img data-g="火炬" alt=""><p>烟火上达，署已闻之……</p></div>
+
+  <!-- 文化图鉴 -->
+  <section id="scr-codex" class="screen">
+    <div class="codex-head">
+      <button class="icon-btn" id="codex-back">←</button>
+      <h2>文化图鉴</h2>
+      <span class="codex-count num" id="codex-count">0/12</span>
+    </div>
+    <div class="codex-grid" id="codex-grid"></div>
+  </section>
+
+  <!-- 结局 -->
+  <section id="scr-ending" class="screen">
+    <div class="end-icon" id="end-icon">🌿</div>
+    <div class="end-name" id="end-name">兄弟契约</div>
+    <div class="end-tag" id="end-tag">完美结局</div>
+    <div class="end-desc" id="end-desc"></div>
+    <div class="end-proverb" id="end-proverb"></div>
+    <div class="end-btns">
+      <button class="btn" id="end-again">再来一次</button>
+      <button class="btn ghost" id="end-menu">返回主菜单</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="scroll-glyphs.js"></script>
+<script>
+// ===SHU CORE START===
+var SHU=(function(){
+'use strict';
+var SEASONS=[{k:'春',icon:'🌸'},{k:'夏',icon:'☀️'},{k:'秋',icon:'🍂'},{k:'冬',icon:'❄️'}];
+var RES_META=[['grain','🌾粮食'],['wood','🪵木材'],['water','💧水源'],['beast','🐟牲灵']];
+function clamp(v,lo,hi){return v<lo?lo:(v>hi?hi:v);}
+function seasonOf(round){return (round-1)%4;}
+function yearOf(round){return Math.ceil(round/4);}
+
+// cond: 触发条件；crisis: 危机事件（署怒>=80 时优先）
+var EVENTS=[
+{id:1,title:'山林之问',cond:function(s){return s.round>=2&&s.round<=4;},
+ desc:'春耕在即，村民需要更多田地。村东的山林土地肥沃，但那是"署"的领地——鹿群在那里栖息，古树在那里生长。几位年轻村民拿着斧头来找你："东巴，让我们砍了那片林子吧！"',
+ note:'东巴经记载，人类曾因过度砍伐激怒"署"，最终在大鹏神鸟的调解下达成契约——不得在树木发芽季节砍伐。',
+ options:[
+  {t:'批准开垦',p:5,a:12,fx:{wood:3},pre:'繁荣+5 · 署怒+12 · 木材+3'},
+  {t:'严令禁止',p:-2,a:-3,c:1,pre:'繁荣-2 · 署怒-3 · 文化+1'},
+  {t:'举行祭署仪式后限量开垦',p:3,a:5,c:2,pre:'繁荣+3 · 署怒+5 · 文化+2'}]},
+{id:2,title:'河中鱼群',cond:function(s){return seasonOf(s.round)===1;},
+ desc:'今年雨水丰沛，河里的鱼格外多。一网下去足够全村吃三天。但村里的老人说，这是"署"的赠礼——"鱼群满河"是自然的恩赐，不可尽取。',
+ note:'纳西族传统认为，在鱼类繁殖季节不得捕猎。只取所需、放生幼鱼，正是"取之有度、用之有节"的体现。',
+ options:[
+  {t:'大量捕捞',p:4,a:8,fx:{grain:5},pre:'繁荣+4 · 署怒+8 · 粮食+5'},
+  {t:'只取所需',p:1,a:1,fx:{grain:2},pre:'繁荣+1 · 署怒+1 · 粮食+2'},
+  {t:'捕捞后放生幼鱼',p:2,a:0,wise:true,pre:'繁荣+2 · 署怒+0 · 获得"智者"称号'}]},
+{id:3,title:'东巴的手稿',cond:function(s){return s.round>=5&&s.round<=8;},
+ desc:'你在整理老东巴的遗物时，发现一卷《署谷》经书的手抄残篇。纸页泛黄，但上面的东巴文依然清晰。其中记载了一种失传已久的"与署对话"的仪式。',
+ note:'东巴经的传承从来不是封闭的。口传、手抄、火塘故事，让经典智慧在民间生生不息。',
+ options:[
+  {t:'研读并传承',p:1,a:-3,c:3,pre:'繁荣+1 · 署怒-3 · 文化+3'},
+  {t:'藏入阁楼',p:0,a:0,pre:'无变化'},
+  {t:'抄写多份分给村民',p:3,a:-2,c:5,pre:'繁荣+3 · 署怒-2 · 文化+5'}]},
+{id:4,title:'外乡人的交易',cond:function(s){return s.round>=9&&s.round<=12;},
+ desc:'一个外乡商人来到村子，想用铁器换你们山里的百年古木。铁器能大大提升农耕效率，但古木是"署"的栖息之所——砍了它们，等于拆了"署"的家。',
+ note:'纳西族传统中，水源地的树木被严格禁止砍伐。砍伐古木被视为对自然的严重冒犯。',
+ options:[
+  {t:'同意交易',p:6,a:15,flag:'ironDeal',pre:'繁荣+6 · 署怒+15 · 此后每回合粮食+1'},
+  {t:'坚决拒绝',p:-1,a:-3,c:1,pre:'繁荣-1 · 署怒-3 · 文化+1'},
+  {t:'用其他木材替代',p:2,a:2,fx:{wood:-2},pre:'繁荣+2 · 署怒+2 · 木材-2'}]},
+{id:5,title:'火塘边的争端',cond:function(s){return seasonOf(s.round)===3;},
+ desc:'火塘边，两个村民吵了起来。年轻的阿普说："\'署\'根本不存在！我们应该放开手脚发展村子！"年长的阿老说："你忘了祖宗的教训吗？忘了那场洪水吗？"',
+ note:'火塘是纳西家庭传承的核心场所。"大传统"与"小传统"的互动，正是在这样的火塘边完成的。',
+ options:[
+  {t:'支持年轻派',p:4,a:6,c:-2,pre:'繁荣+4 · 署怒+6 · 文化-2'},
+  {t:'支持年长派',p:-1,a:-4,c:2,pre:'繁荣-1 · 署怒-4 · 文化+2'},
+  {t:'翻开《署谷》当众诵读',p:2,a:-3,c:3,pre:'繁荣+2 · 署怒-3 · 文化+3'}]},
+{id:6,title:'大旱之年',crisis:true,cond:function(s){return seasonOf(s.round)===1&&s.anger>=60;},
+ desc:'河水浅得见了底，田地裂开指宽的缝。祭司台上积了灰。',
+ note:'纳西人遇旱不怨天，先自省是否过度索取，再以仪式与"署"对话。',
+ options:[
+  {t:'引山泉灌溉',p:0,a:2,fx:{water:-3,grain:2},pre:'繁荣+0 · 署怒+2 · 水源-3 · 粮食+2'},
+  {t:'举行祈雨祭',p:1,a:-6,fx:{beast:-1},c:1,pre:'繁荣+1 · 署怒-6 · 牲灵-1 · 文化+1'},
+  {t:'听天由命',p:-4,a:3,pre:'繁荣-4 · 署怒+3'}]},
+{id:7,title:'虫灾来袭',crisis:true,cond:function(s){return s.anger>=60;},
+ desc:'一夜之间，蝗虫遮住了半边天，谷叶被啃得沙沙作响。',
+ note:'生态失衡常被视为"署"的提醒。以鸭治虫，是山地民族的古老智慧。',
+ options:[
+  {t:'火烧田埂驱虫',p:-2,a:4,fx:{grain:-2},pre:'繁荣-2 · 署怒+4 · 粮食-2'},
+  {t:'放鸭群入田',p:1,a:-2,fx:{beast:-1},c:1,pre:'繁荣+1 · 署怒-2 · 牲灵-1 · 文化+1'},
+  {t:'放弃这块田',p:-6,a:2,pre:'繁荣-6 · 署怒+2'}]},
+{id:8,title:'祭天仪式',cond:function(s){return seasonOf(s.round)===0;},
+ desc:'开春第一件事，是答谢天地。村民问你今年祭天怎么办。',
+ note:'纳西祭天是国家级非遗——正月祭天，感恩自然，是人与"署"契约的年度重申。',
+ options:[
+  {t:'隆重祭天',p:2,a:-5,fx:{grain:-1,beast:-1},c:2,pre:'繁荣+2 · 署怒-5 · 粮食-1 · 牲灵-1 · 文化+2'},
+  {t:'从简行礼',p:0,a:-2,c:1,pre:'繁荣+0 · 署怒-2 · 文化+1'},
+  {t:'今年不办',p:0,a:3,pre:'繁荣+0 · 署怒+3'}]},
+{id:9,title:'收获祭祀',cond:function(s){return seasonOf(s.round)===2;},
+ desc:'新谷入仓，按老规矩要先献新谷谢"署"。',
+ note:'尝新献祭，是把第一口收获还给自然——取之有时，谢之有礼。',
+ options:[
+  {t:'丰宴谢神',p:4,a:-3,fx:{grain:-2},c:1,pre:'繁荣+4 · 署怒-3 · 粮食-2 · 文化+1'},
+  {t:'献新谷于山泉',p:1,a:-4,fx:{grain:-1},c:2,pre:'繁荣+1 · 署怒-4 · 粮食-1 · 文化+2'},
+  {t:'收割即走',p:1,a:4,fx:{grain:2},pre:'繁荣+1 · 署怒+4 · 粮食+2'}]},
+{id:10,title:'火塘故事会',cond:function(s){return seasonOf(s.round)===3;},
+ desc:'雪封了山，火塘烧得正旺，孩子们围过来等你讲故事。',
+ note:'火塘边的故事会，是东巴经典"活态传承"的真正课堂。',
+ options:[
+  {t:'讲《署谷》的契约',p:1,a:-2,c:2,pre:'繁荣+1 · 署怒-2 · 文化+2'},
+  {t:'讲祖先打猎的勇武',p:2,a:1,pre:'繁荣+2 · 署怒+1'},
+  {t:'添柴早点睡',p:1,a:0,fx:{wood:-1},pre:'繁荣+1 · 署怒+0 · 木材-1'}]},
+{id:11,title:'竹林造纸',cond:function(s){return s.round>=6&&s.round<=14;},
+ desc:'有村民提议砍一片竹子，扩建纸坊多造东巴纸。',
+ note:'东巴纸以荛花树皮手工制成，千年不蛀。取材有度，纸脉才得以延续。',
+ options:[
+  {t:'砍竹扩坊',p:3,a:5,fx:{wood:-2},c:1,pre:'繁荣+3 · 署怒+5 · 木材-2 · 文化+1'},
+  {t:'按需砍竹、补种新竹',p:1,a:1,c:2,pre:'繁荣+1 · 署怒+1 · 文化+2'},
+  {t:'维持手抄旧纸',p:0,a:-1,c:1,pre:'繁荣+0 · 署怒-1 · 文化+1'}]},
+{id:12,title:'雪山融水',cond:function(s){return seasonOf(s.round)===0;},
+ desc:'居那若罗神山的雪水下来了，有人想修一条水渠引进村。',
+ note:'动土之前先问山川——纳西人相信，水有水的主人。',
+ options:[
+  {t:'伐木修渠',p:2,a:3,fx:{wood:-2,water:5},pre:'繁荣+2 · 署怒+3 · 木材-2 · 水源+5'},
+  {t:'先祭水神再动土',p:1,a:-2,fx:{beast:-1,water:4},c:1,pre:'繁荣+1 · 署怒-2 · 牲灵-1 · 水源+4 · 文化+1'},
+  {t:'维持旧井',p:0,a:0,fx:{water:1},pre:'繁荣+0 · 署怒+0 · 水源+1'}]},
+{id:13,title:'山中草药',cond:function(s){return s.round>=3&&s.round<=15;},
+ desc:'妇人病了，急需崖上的草药。药农问：采多少？',
+ note:'采药留根，是山地民族与自然相处的分寸。',
+ options:[
+  {t:'尽数采回',p:3,a:4,pre:'繁荣+3 · 署怒+4'},
+  {t:'采大留小、留根留种',p:1,a:-1,c:1,pre:'繁荣+1 · 署怒-1 · 文化+1'},
+  {t:'只采一半，另一半祭山',p:1,a:-3,fx:{beast:-1},pre:'繁荣+1 · 署怒-3 · 牲灵-1'}]},
+{id:14,title:'邻村借粮',cond:function(s){return s.round>=5&&s.round<=16;},
+ desc:'上游村子遭了雹灾，派人来借三份粮。',
+ note:'村落之间的互助，也是"契约"的一部分——人对人守信，天才对人守信。',
+ options:[
+  {t:'借！',p:2,a:-1,fx:{grain:-3},c:2,delay:{rounds:3,fx:{grain:4},note:'邻村还粮：粮食+4'},pre:'繁荣+2 · 署怒-1 · 粮食-3 · 文化+2（3回合后还粮+4）'},
+  {t:'借一半',p:1,a:0,fx:{grain:-2},c:1,pre:'繁荣+1 · 署怒+0 · 粮食-2 · 文化+1'},
+  {t:'自家也难',p:-1,a:1,pre:'繁荣-1 · 署怒+1'}]},
+{id:15,title:'猎户的鹿角',cond:function(s){return s.round>=7&&s.round<=18;},
+ desc:'猎户捡回一副巨大鹿角，商人出高价，老人却说该祭给"署"。',
+ note:'山林的遗赠，取与不取，都是态度。',
+ options:[
+  {t:'卖给商人',p:3,a:3,fx:{grain:2},pre:'繁荣+3 · 署怒+3 · 粮食+2'},
+  {t:'挂上祭坛',p:1,a:-4,c:1,pre:'繁荣+1 · 署怒-4 · 文化+1'},
+  {t:'埋回山林',p:0,a:-2,c:1,pre:'繁荣+0 · 署怒-2 · 文化+1'}]}
+];
+var E={}; EVENTS.forEach(function(e){E[e.id]=e;});
+var ALL_IDS=EVENTS.map(function(e){return e.id;});
+
+var ENDINGS={
+ pact:{icon:'🌿',name:'兄弟契约',tag:'完美结局',style:'gold',
+  desc:'你与"署"并肩而行。村子繁荣昌盛，山林依旧葱郁。你在老东巴的经书上写下了最后一笔——契约完整了。',
+  proverb:'"人与自然，兄弟也。你做到了。"'},
+ wisdom:{icon:'📜',name:'东巴之智',tag:'隐藏结局',style:'gold',glyph:'经书',
+  desc:'你不仅守住了村子，更守住了祖辈的智慧。你修复了整部《署谷》经书，成为了真正的东巴。',
+  proverb:'"火塘未熄，智慧永传。"'},
+ mortal:{icon:'⚖️',name:'凡人之道',tag:'普通结局',style:'normal',
+  desc:'你不是圣人，也不是罪人。在索取与敬畏之间，你走完了凡人的路。村子还在，山林还在。',
+  proverb:'"不完美，但真实。"'},
+ endure:{icon:'🏔️',name:'艰难相守',tag:'存活结局',style:'normal',
+  desc:'村子还在，但山林的伤痕提醒你：平衡从不是一次抵达，而是日日修行。',
+  proverb:'"山还在，路还长。"'},
+ burn:{icon:'🔥',name:'贪婪之焚',tag:'失败结局',style:'gray',
+  desc:'"署"终于降下了洪水。村庄被吞没，你站在山顶，看着家园变成汪洋。',
+  proverb:'"索取无度，兄弟反目。"'},
+ wither:{icon:'🏚️',name:'凋零之村',tag:'失败结局',style:'gray',
+  desc:'村民一个个离开了。火塘熄灭了。你守住了山林，却失去了人。',
+  proverb:'"没有了人，契约又有何用？"'}
+};
+
+function shuffled(arr,rand){arr=arr.slice();for(var i=arr.length-1;i>0;i--){var j=Math.floor((rand||Math.random)()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}return arr;}
+
+function newGame(){
+ return {round:1,prosperity:40,anger:20,culture:0,
+  res:{grain:8,wood:6,water:6,beast:4},
+  deck:shuffled(ALL_IDS),pending:[],flags:{},cooldown:0,
+  currentEvent:null,turnDelta:null,over:null};
+}
+function addP(st,d){st.prosperity=clamp(st.prosperity+d,0,100);if(st.turnDelta)st.turnDelta.p+=d;}
+function addA(st,d){st.anger=clamp(st.anger+d,0,100);if(st.turnDelta)st.turnDelta.a+=d;}
+function addRes(st,k,d){st.res[k]=clamp(st.res[k]+d,0,20);}
+
+// 回合开始：季节修正→基础产出→吃饭→怒气衰减→延迟队列→冷却→抽事件
+function beginTurn(st,rand){
+ st.turnDelta={p:0,a:0,notes:[]};
+ var s=seasonOf(st.round);
+ if(s===0){addRes(st,'water',2);st.turnDelta.notes.push('春霖润物：水源+2');}
+ if(s===2){addRes(st,'grain',3);st.turnDelta.notes.push('秋收在望：粮食+3');}
+ addRes(st,'grain',[2,1,1,1][s]);addRes(st,'wood',1);addRes(st,'water',1);addRes(st,'beast',1);
+ if(st.flags.ironDeal){addRes(st,'grain',1);st.turnDelta.notes.push('铁器农耕：粮食+1');}
+ var need=(s===1)?3:((s===3)?4:2);
+ if(st.res.grain>=need){st.res.grain-=need;}
+ else{var gap=need-st.res.grain;st.res.grain=0;addP(st,-(3+gap*2));st.turnDelta.notes.push('缺粮 '+gap+' 份！村民挨饿');}
+ if(st.anger<80&&st.anger>0){addA(st,-1);}
+ var left=[];
+ st.pending.forEach(function(p){p.rounds--;if(p.rounds<=0){for(var k in p.fx){addRes(st,k,p.fx[k]);}st.turnDelta.notes.push(p.note);}else left.push(p);});
+ st.pending=left;
+ if(st.cooldown>0)st.cooldown--;
+ var ev=pickEvent(st,rand);
+ st.currentEvent=ev.id;
+ return ev;
+}
+function pickEvent(st,rand){
+ rand=rand||Math.random;
+ var elig=st.deck.filter(function(id){return !E[id].cond||E[id].cond(st);});
+ var pool=elig;
+ if(st.anger>=80){var cr=elig.filter(function(id){return E[id].crisis;});if(cr.length)pool=cr;}
+ if(!pool.length){
+  st.deck=shuffled(ALL_IDS,rand);
+  elig=st.deck.filter(function(id){return !E[id].cond||E[id].cond(st);});
+  pool=elig;
+  if(st.anger>=80){var cr2=elig.filter(function(id){return E[id].crisis;});if(cr2.length)pool=cr2;}
+  if(!pool.length)pool=st.deck.slice();
+ }
+ var id=pool[Math.floor(rand()*pool.length)];
+ var ix=st.deck.indexOf(id); if(ix>=0)st.deck.splice(ix,1);
+ return E[id];
+}
+// 选择事件选项：应用效果→判定结局
+function choose(st,idx){
+ var ev=E[st.currentEvent];var o=ev.options[idx];
+ if(o.p)addP(st,o.p);
+ if(o.a)addA(st,o.a);
+ if(o.c)st.culture=Math.max(0,st.culture+o.c);
+ if(o.fx)for(var k in o.fx)addRes(st,k,o.fx[k]);
+ if(o.flag)st.flags[o.flag]=true;
+ if(o.wise)st.flags.wise=true;
+ if(o.delay)st.pending.push({rounds:o.delay.rounds,fx:o.delay.fx,note:o.delay.note});
+ st.lastChoice={ev:ev.id,idx:idx};
+ if(st.anger>=100)st.over='burn';
+ else if(st.prosperity<=0)st.over='wither';
+ else if(st.round>=20)st.over=finalEnding(st);
+ else st.round++;
+ return {over:st.over,ev:ev,opt:o};
+}
+function finalEnding(st){
+ if(st.prosperity>=60&&st.anger<=30)return st.culture>=15?'wisdom':'pact';
+ if(st.prosperity>=40&&st.anger<=50)return 'mortal';
+ return 'endure';
+}
+var RITUALS={
+ grain:{name:'献上粮食',need:{grain:2},a:-8,desc:'粮食-2 · 署怒-8'},
+ beast:{name:'献上牲灵',need:{beast:1},a:-10,desc:'牲灵-1 · 署怒-10'},
+ grand:{name:'隆重祭祀',need:{grain:2,beast:1},a:-15,c:1,desc:'粮食-2 · 牲灵-1 · 署怒-15 · 文化+1'}
+};
+function ritualStatus(st){
+ var out={unlocked:st.culture>=3,cooldown:st.cooldown,options:[]};
+ for(var k in RITUALS){
+  var r=RITUALS[k],ok=true,reason='';
+  if(!out.unlocked){ok=false;reason='文化不足';}
+  else if(st.cooldown>0){ok=false;reason='冷却中';}
+  else for(var rk in r.need){if(st.res[rk]<r.need[rk]){ok=false;reason='资源不足';}}
+  out.options.push({kind:k,ok:ok,reason:reason});
+ }
+ return out;
+}
+function ritual(st,kind){
+ var r=RITUALS[kind];if(!r)return {ok:false,reason:'未知祭品'};
+ var stt=ritualStatus(st);
+ if(!stt.unlocked)return {ok:false,reason:'文化传承不足（需≥3）'};
+ if(st.cooldown>0)return {ok:false,reason:'仪式冷却中'};
+ for(var rk in r.need){if(st.res[rk]<r.need[rk])return {ok:false,reason:'祭品不足'};}
+ for(var k2 in r.need)addRes(st,k2,-r.need[k2]);
+ addA(st,r.a);
+ if(r.c)st.culture+=r.c;
+ st.cooldown=3;
+ st.flags.ritualUsed=true;
+ return {ok:true,dAnger:r.a};
+}
+return {SEASONS:SEASONS,RES_META:RES_META,EVENTS:EVENTS,E:E,ENDINGS:ENDINGS,RITUALS:RITUALS,
+ seasonOf:seasonOf,yearOf:yearOf,newGame:newGame,beginTurn:beginTurn,choose:choose,
+ ritual:ritual,ritualStatus:ritualStatus,finalEnding:finalEnding};
+})();
+if(typeof window!=='undefined')window.SHU=SHU;
+// ===SHU CORE END===
+</script>
+<script>
+(function(){
+'use strict';
+var HAS_G=(typeof GLYPHS!=='undefined');
+function g(k){return HAS_G&&GLYPHS[k]?GLYPHS[k]:'';}
+function gimg(k,cls){var s=g(k);return s?'<img class="'+(cls||'glyph-img')+'" src="'+s+'" alt="'+k+'">':'';}
+// 静态字图填充
+document.querySelectorAll('img[data-g]').forEach(function(im){var s=g(im.getAttribute('data-g'));if(s)im.src=s;else im.style.display='none';});
+
+/* ========== 音效（WebAudio 极简合成） ========== */
+var SND={ctx:null,on:true,
+ ensure:function(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
+ play:function(fn){if(!this.on)return;this.ensure();if(!this.ctx)return;try{fn(this.ctx);}catch(e){}},
+ click:function(){this.play(function(c){var o=c.createOscillator(),gn=c.createGain();o.type='triangle';o.frequency.value=640;gn.gain.setValueAtTime(.12,c.currentTime);gn.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);o.connect(gn).connect(c.destination);o.start();o.stop(c.currentTime+.1);});},
+ page:function(){this.play(function(c){var len=c.sampleRate*.18,buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);var src=c.createBufferSource();src.buffer=buf;var f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;var gn=c.createGain();gn.gain.value=.18;src.connect(f).connect(gn).connect(c.destination);src.start();});},
+ hum:function(){this.play(function(c){var t=c.currentTime;[98,147].forEach(function(fr,i){var o=c.createOscillator(),gn=c.createGain();o.type='sine';o.frequency.value=fr;gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.16/(i+1),t+.25);gn.gain.linearRampToValueAtTime(.001,t+1.6);o.connect(gn).connect(c.destination);o.start(t);o.stop(t+1.7);});});},
+ chord:function(good){this.play(function(c){var t=c.currentTime,fs=good?[262,330,392,523]:[220,208,175];fs.forEach(function(fr,i){var o=c.createOscillator(),gn=c.createGain();o.type='sine';o.frequency.value=fr;gn.gain.setValueAtTime(0,t+i*.12);gn.gain.linearRampToValueAtTime(.12,t+i*.12+.08);gn.gain.linearRampToValueAtTime(.001,t+2.2);o.connect(gn).connect(c.destination);o.start(t+i*.12);o.stop(t+2.3);});});}
+};
+try{SND.on=localStorage.getItem('shu_sound')!=='off';}catch(e){}
+
+/* ========== 存取 ========== */
+var LS={get:function(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}},
+ set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
+ del:function(k){try{localStorage.removeItem(k);}catch(e){}}};
+
+/* ========== 图鉴 ========== */
+var CODEX=[
+ {k:'shu',name:'署',glyph:'水',desc:'自然之神，山水的主人'},
+ {k:'fire',name:'火塘',glyph:'火',desc:'家的中心，传承的课堂'},
+ {k:'snow',name:'雪山',glyph:'雪山',desc:'居那若罗神山，众水之源'},
+ {k:'jing',name:'东巴经',glyph:'经书',desc:'东巴文化的百科全书'},
+ {k:'jisi',name:'祭署仪式',glyph:'祈祷',desc:'人与署对话的古老仪式'},
+ {k:'peng',name:'大鹏神鸟',glyph:'鸟',desc:'调解人署纷争的神使'},
+ {k:'jitian',name:'祭天',glyph:'天',desc:'正月祭天，感恩自然'},
+ {k:'zhi',name:'东巴纸',glyph:'纸',desc:'荛花树皮制成，千年不蛀'},
+ {k:'jiang',name:'金沙江',glyph:'江',desc:'雪山融水汇成的母亲河'},
+ {k:'pact',name:'兄弟契约',glyph:'同胞',desc:'人与自然，兄弟也'},
+ {k:'wise',name:'智者',glyph:'星',desc:'取之有度，用之有节'},
+ {k:'flood',name:'洪水',glyph:'洪水',desc:'索取无度的警示'}
+];
+var codexSet={};
+function loadCodex(){var a=LS.get('shu_codex')||['shu','fire','snow'];codexSet={};a.forEach(function(k){codexSet[k]=1;});['shu','fire','snow'].forEach(function(k){codexSet[k]=1;});}
+function unlock(k){if(!codexSet[k]){codexSet[k]=1;LS.set('shu_codex',Object.keys(codexSet));renderCodexCount();}}
+function renderCodexCount(){var n=CODEX.filter(function(c){return codexSet[c.k];}).length;document.getElementById('codex-count').textContent='已解锁 '+n+'/12';}
+function renderCodex(){renderCodexCount();var html='';CODEX.forEach(function(c){var un=!!codexSet[c.k];
+ html+='<div class="codex-card'+(un?'':' lock')+'">'+(un?gimg(c.glyph):'')+'<div class="cn">'+(un?c.name:'🔒 ？？？')+'</div><div class="cd">'+(un?c.desc:'尚未解锁')+'</div></div>';});
+ document.getElementById('codex-grid').innerHTML=html;}
+loadCodex();
+
+/* ========== 界面切换 ========== */
+var $=function(id){return document.getElementById(id);};
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});$(id).classList.add('on');}
+
+/* ========== 主菜单 ========== */
+function refreshMenu(){
+ var best=LS.get('shu_best');
+ $('menu-best').textContent=best?('最佳：'+best.name):'火塘已备好，等你开坛';
+ $('btn-continue').style.display=LS.get('shu_save')?'block':'none';
+ $('btn-sound').textContent='声音：'+(SND.on?'开':'关');
+}
+(function buildMarquee(){
+ var ks=['火','石','经书','读','星'],html='';
+ for(var r=0;r<2;r++){ks.forEach(function(k){html+=gimg(k)?'<img src="'+g(k)+'" alt="'+k+'">':'';});}
+ $('mq-track').innerHTML=html;
+})();
+
+/* ========== 启动页 ========== */
+(function boot(){
+ var p=0,fill=$('boot-fill');
+ var t=setInterval(function(){p=Math.min(100,p+4+Math.random()*7);fill.style.width=p+'%';
+  if(p>=100){clearInterval(t);setTimeout(function(){refreshMenu();show('scr-menu');},350);}},90);
+})();
+
+/* ========== 游戏状态与渲染 ========== */
+var G=null; // SHU state
+function saveGame(){if(G&&!G.over)LS.set('shu_save',G);}
+function prosText(v){return v>=60?'火塘温暖，村民安康':(v<=25?'饥寒交迫，人心浮动':'炊烟袅袅，村落如常');}
+function angerText(v){return v>=70?'山雨欲来，署在咆哮':'山林低语，署在注视';}
+function renderStats(){
+ $('ui-round').textContent='第 '+G.round+' 回合 / 共 20 回合';
+ var s=SHU.SEASONS[SHU.seasonOf(G.round)];
+ $('ui-season').textContent=s.icon+' '+s.k+' · 第'+SHU.yearOf(G.round)+'年';
+ $('bar-pros').style.width=G.prosperity+'%';$('val-pros').textContent=G.prosperity;$('st-pros').textContent=prosText(G.prosperity);
+ $('bar-anger').style.width=G.anger+'%';$('val-anger').textContent=G.anger;$('st-anger').textContent=angerText(G.anger);
+ $('rage').className=G.anger>=80?'lv2':(G.anger>=70?'lv1':'');
+ var html='';SHU.RES_META.forEach(function(m){var v=G.res[m[0]];
+  html+='<div class="res-cell"><div class="rn">'+m[1]+'</div><div class="rv num">'+v+'</div><div class="res-mini"><i style="width:'+(v/20*100)+'%"></i></div></div>';});
+ $('res-row').innerHTML=html;
+ $('val-culture').textContent=G.culture;
+ $('ritual-hint').textContent=G.culture>=3?'祭署仪式已解锁':'文化≥3 解锁祭署仪式';
+ var rst=SHU.ritualStatus(G),btn=$('ritual-btn');
+ if(!rst.unlocked){btn.disabled=true;$('ritual-sub').textContent='未解锁';}
+ else if(rst.cooldown>0){btn.disabled=true;$('ritual-sub').textContent='冷却'+rst.cooldown;}
+ else{btn.disabled=false;$('ritual-sub').textContent='祭祀';}
+ if(G.culture>=3)unlock('jisi');
+}
+function floatN(text,color){var f=document.createElement('span');f.className='float-n';f.textContent=text;
+ f.style.color=color;f.style.left=(30+Math.random()*60)+'%';f.style.top=(60+Math.random()*80)+'px';
+ $('floats').appendChild(f);setTimeout(function(){f.remove();},1150);}
+function renderEvent(){
+ var ev=SHU.E[G.currentEvent];if(!ev)return;
+ var html='';
+ if(ev.crisis)html+='<div class="ev-tag">⚠ 危机</div>';
+ html+='<div class="ev-title">'+ev.title+'</div><div class="ev-desc">'+ev.desc+'</div>';
+ ev.options.forEach(function(o,i){
+  html+='<button class="ev-opt" data-i="'+i+'"><div class="ot">'+o.t+'</div><div class="op">'+o.pre+'</div></button>';});
+ html+='<button class="ev-note-btn" id="ev-note">📖 查看典籍原文</button>';
+ $('ev-card').innerHTML=html;
+ $('ev-card').querySelectorAll('.ev-opt').forEach(function(b){b.onclick=function(){SND.click();doChoice(+b.getAttribute('data-i'));};});
+ $('ev-note').onclick=function(){SND.page();if(ev.id===1)unlock('peng');
+  $('note-body').textContent=ev.note;$('note-mask').classList.add('on');};
+}
+$('note-close').onclick=function(){SND.click();$('note-mask').classList.remove('on');};
+
+function codexHookChoice(evId,idx){
+ if(evId===3)unlock('jing');
+ if(evId===8)unlock('jitian');
+ if(evId===11)unlock('zhi');
+ if(evId===12)unlock('jiang');
+ if(evId===2&&idx===2)unlock('wise');
+}
+
+/* ========== 回合流程 ========== */
+function startTurn(){
+ var ev=SHU.beginTurn(G);
+ renderStats();renderEvent();saveGame();
+}
+function doChoice(idx){
+ var before={p:G.prosperity,a:G.anger};
+ var r=SHU.choose(G,idx);
+ codexHookChoice(r.ev.id,idx);
+ var dp=G.prosperity-before.p,da=G.anger-before.a;
+ if(dp)floatN((dp>0?'+':'')+dp+' 繁荣',dp>0?'#B8860B':'#8a6d1a');
+ if(da)floatN((da>0?'+':'')+da+' 署怒',da>0?'#C41A1A':'#2D7D46');
+ renderStats();
+ if(r.opt.flag==='ironDeal'||r.opt.delay||r.opt.wise||r.opt.fx||r.opt.c){}
+ saveGame();
+ setTimeout(function(){
+  if(r.over){endGame(r.over);return;}
+  var td=G.turnDelta;
+  var s=SHU.SEASONS[SHU.seasonOf(G.round)];
+  $('ov-season').textContent=s.icon+' '+s.k+' · 第'+SHU.yearOf(G.round)+'年';
+  var lines='<div class="ov-d" style="color:'+(td.p>=0?'#E8C85A':'#d99')+'">繁荣 '+(td.p>=0?'+':'')+td.p+'</div>'+
+            '<div class="ov-d" style="color:'+(td.a>0?'#E06A5A':'#7FBF92')+'">署怒 '+(td.a>=0?'+':'')+td.a+'</div>';
+  $('ov-lines').innerHTML=lines;
+  $('ov-note').textContent=td.notes.join('　')||'岁月安然，山村如常';
+  $('overlay').classList.add('on');SND.page();
+  setTimeout(function(){$('overlay').classList.remove('on');startTurn();},1200);
+ },650);
+}
+
+/* ========== 祭署仪式 ========== */
+var ritSel=null;
+$('ritual-btn').onclick=function(){if(this.disabled)return;SND.hum();ritSel=null;renderRitual();$('ritual-mask').classList.add('on');};
+function renderRitual(){
+ var st=SHU.ritualStatus(G),html='';
+ st.options.forEach(function(o){var r=SHU.RITUALS[o.kind];
+  html+='<button class="rit-opt'+(o.ok?'':' na')+(ritSel===o.kind?' sel':'')+'" data-k="'+o.kind+'">'+
+   '<div class="ot">'+r.name+'</div><div class="op">'+r.desc+(o.ok?'':'（'+o.reason+'）')+'</div></button>';});
+ $('ritual-opts').innerHTML=html;
+ $('ritual-opts').querySelectorAll('.rit-opt').forEach(function(b){b.onclick=function(){
+  if(b.classList.contains('na'))return;SND.click();ritSel=b.getAttribute('data-k');renderRitual();};});
+}
+$('ritual-cancel').onclick=function(){SND.click();$('ritual-mask').classList.remove('on');};
+$('ritual-go').onclick=function(){
+ if(!ritSel)return;
+ var r=SHU.ritual(G,ritSel);
+ if(!r.ok)return;
+ $('ritual-mask').classList.remove('on');
+ unlock('pact');SND.hum();
+ $('ritual-anim').classList.add('on');
+ floatN(r.dAnger+' 署怒','#2D7D46');
+ setTimeout(function(){$('ritual-anim').classList.remove('on');renderStats();saveGame();},1500);
+};
+
+/* ========== 结局 ========== */
+var END_RANK={wisdom:5,pact:4,mortal:3,endure:2,burn:1,wither:1};
+function endGame(key){
+ var e=SHU.ENDINGS[key];
+ if(key==='burn')unlock('flood');
+ LS.del('shu_save');
+ var best=LS.get('shu_best');
+ if(!best||END_RANK[key]>END_RANK[best.key])LS.set('shu_best',{key:key,name:e.name});
+ var scr=$('scr-ending');
+ scr.className='screen '+e.style;
+ $('end-icon').innerHTML=(key==='wisdom'&&g('经书'))?'<img src="'+g('经书')+'" alt="经书">':e.icon;
+ $('end-name').textContent=e.name;
+ $('end-tag').textContent=e.tag+' · '+SHU.yearOf(G.round)+' 年 · 文化 '+G.culture;
+ $('end-desc').textContent=e.desc;
+ $('end-proverb').textContent=e.proverb;
+ show('scr-ending');
+ SND.chord(key!=='burn'&&key!=='wither');
+}
+$('end-again').onclick=function(){SND.click();newRun();};
+$('end-menu').onclick=function(){SND.click();refreshMenu();show('scr-menu');};
+
+/* ========== 开局 ========== */
+function newRun(){G=SHU.newGame();show('scr-game');startTurn();}
+$('btn-start').onclick=function(){SND.click();newRun();};
+$('btn-continue').onclick=function(){SND.click();var s=LS.get('shu_save');if(!s)return;G=s;show('scr-game');renderStats();renderEvent();};
+$('btn-codex').onclick=function(){SND.page();renderCodex();show('scr-codex');};
+$('codex-back').onclick=function(){SND.click();refreshMenu();show('scr-menu');};
+$('btn-sound').onclick=function(){SND.on=!SND.on;try{localStorage.setItem('shu_sound',SND.on?'on':'off');}catch(e){}this.textContent='声音：'+(SND.on?'开':'关');if(SND.on)SND.click();};
+$('btn-restart').onclick=function(){SND.click();if(confirm('放弃当前这一局，重新开始？')){LS.del('shu_save');newRun();}};
+})();
+</script>
+</body>
+</html>
