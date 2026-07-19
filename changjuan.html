@@ -11,15 +11,78 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;background:#dccc9e;overflow:hidden;font-family:"Noto Serif SC","STKaiti","KaiTi","STSong",serif}
-  #scroll{height:100vh;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;cursor:grab}
+  #scroll{position:relative;height:100vh;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;cursor:grab}
   #scroll::-webkit-scrollbar{display:none}
   #scroll.dragging{cursor:grabbing}
   #juan{display:block;height:100vh;width:auto}
+  #flow{position:absolute;left:0;top:0;pointer-events:none}
   .st{opacity:0;transform:translateY(14px);transition:opacity .8s ease,transform .8s ease}
   .st.on{opacity:1;transform:none}
-  image.g{mix-blend-mode:multiply}
-  .seal-img{filter:invert(1) brightness(2.4);mix-blend-mode:screen}
-  /* 进度条与站点导航 */
+  /* ===== 站点触发动画 ===== */
+  /* 第一站：火苗跳动 + 声波扩散 */
+  #st1 .flames{transform-box:view-box;transform-origin:900px 508px}
+  #st1.on .flames{animation:flick 1.5s ease-in-out infinite}
+  @keyframes flick{0%,100%{transform:scale(1,1)}28%{transform:scale(.95,1.09)}55%{transform:scale(1.05,.93)}78%{transform:scale(.97,1.05)}}
+  #st1 .wave path{transform-box:view-box;transform-origin:900px 382px}
+  #st1.on .wave path{animation:wv 2.6s ease-out infinite}
+  #st1.on .wave path:nth-child(2){animation-delay:.35s}
+  #st1.on .wave path:nth-child(3){animation-delay:.15s}
+  #st1.on .wave path:nth-child(4){animation-delay:.5s}
+  @keyframes wv{0%{opacity:.85;transform:scale(1)}75%{opacity:.12;transform:scale(1.22)}100%{opacity:0;transform:scale(1.26)}}
+  /* 第二站：竹笔刻写轨迹 */
+  #st2.on .pen{animation:carve 3.4s ease-in-out infinite}
+  @keyframes carve{0%,100%{transform:translate(0,0)}25%{transform:translate(-30px,-32px)}50%{transform:translate(-56px,-6px)}75%{transform:translate(-28px,10px)}}
+  #st2 .carve-line{stroke-dasharray:200;stroke-dashoffset:200}
+  #st2.on .carve-line{animation:draw 3.4s ease-in-out infinite}
+  @keyframes draw{0%{stroke-dashoffset:200}40%{stroke-dashoffset:0}75%{stroke-dashoffset:0}100%{stroke-dashoffset:200}}
+  /* 第三站：经卷缓缓展开 */
+  #st3 .pgL,#st3 .pgR{transform-box:view-box;transform-origin:3060px 430px}
+  #st3.on .pgL{animation:unf 1.5s cubic-bezier(.3,.7,.3,1) .35s both}
+  #st3.on .pgR{animation:unf 1.5s cubic-bezier(.3,.7,.3,1) .5s both}
+  @keyframes unf{from{transform:scaleX(.08)}to{transform:scaleX(1)}}
+  /* 第四站：书本翻开 + 文字飞出 */
+  #st4 .cover{transform-box:view-box;transform-origin:4095px 400px}
+  #st4.on .cover{animation:coveropen 1.8s ease .3s both}
+  @keyframes coveropen{from{transform:scaleX(1)}to{transform:scaleX(.04)}}
+  #st4 .fly-t{opacity:0}
+  #st4.on .fly-t{animation:flyup 3.4s ease-out infinite}
+  @keyframes flyup{0%{opacity:0;transform:translateY(0)}12%{opacity:.95}70%{opacity:.5}100%{opacity:0;transform:translateY(-110px)}}
+  /* 第五站：手机屏幕亮起 */
+  #st5 .scr{fill:#26303c;transition:fill 1.5s ease .35s}
+  #st5.on .scr{fill:#eef4f6}
+  #st5 .love,#st5 .ui{opacity:0;transition:opacity 1.1s ease}
+  #st5.on .love{opacity:1;transition-delay:1.1s}
+  #st5.on .ui{opacity:1;transition-delay:1.5s}
+  #st5 .phone{transition:filter 1.5s ease .8s}
+  #st5.on .phone{filter:drop-shadow(0 0 16px rgba(240,200,120,.5))}
+  .qr{transform:translate(5470px,296px);transition:transform .3s}
+  a:hover .qr{transform:translate(5470px,288px)}
+  /* 卷尾回声卡 */
+  .card{transition:transform .3s;transform-box:view-box}
+  a:hover .card{transform:translateY(-8px)}
+  /* ===== 漂浮东巴字 ===== */
+  .flo{position:fixed;width:64px;opacity:.16;pointer-events:none;z-index:2;
+    animation:floaty var(--d,24s) ease-in-out infinite alternate}
+  @keyframes floaty{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(9px,-20px) rotate(var(--r,8deg))}100%{transform:translate(-7px,-36px) rotate(0deg)}}
+  /* ===== 史诗脉络时间线 ===== */
+  #tlBtn{position:fixed;left:26px;bottom:14px;z-index:12;font-family:inherit;font-size:14px;letter-spacing:3px;color:var(--ink);
+    background:rgba(242,231,205,.92);border:1.5px solid var(--ink);border-radius:999px;padding:8px 18px;cursor:pointer;
+    box-shadow:0 2px 10px rgba(60,40,10,.25)}
+  #tlBtn:hover{background:#f6eed7}
+  #tlBtn.off{display:none}
+  #tlSheet{position:fixed;left:0;right:0;bottom:0;z-index:11;background:#f2e7cd;border-top:3px solid var(--ink);
+    box-shadow:0 -8px 28px rgba(60,40,10,.3);padding:16px 28px 22px;transform:translateY(112%);transition:transform .45s cubic-bezier(.3,.8,.3,1)}
+  #tlSheet.open{transform:none}
+  .tl-head{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:700;letter-spacing:4px;color:var(--ink)}
+  #tlClose{cursor:pointer;font-size:26px;color:var(--cinnabar-deep);padding:0 8px;line-height:1}
+  .tl-nodes{position:relative;display:flex;justify-content:space-around;gap:16px;margin-top:14px}
+  .tl-nodes::before{content:'';position:absolute;left:9%;right:9%;top:33px;border-top:2.5px solid var(--cinnabar);opacity:.55}
+  .tl-node{position:relative;z-index:1;width:210px;text-align:center}
+  .tl-img{display:inline-block;background:#f2e7cd;border-radius:50%;padding:8px}
+  .tl-img img{width:52px;height:auto;vertical-align:middle}
+  .tl-node b{display:block;margin-top:6px;font-size:19px;color:var(--cinnabar-deep);letter-spacing:3px}
+  .tl-node p{margin-top:5px;font-size:13.5px;line-height:1.75;color:var(--ink-soft)}
+  /* ===== 进度条与站点导航 ===== */
   #pbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
     background:rgba(242,231,205,.88);border:1.5px solid var(--ink);border-radius:999px;padding:7px 16px;z-index:9;
     box-shadow:0 2px 10px rgba(60,40,10,.25);backdrop-filter:blur(2px)}
@@ -34,12 +97,21 @@
     writing-mode:vertical-rl;animation:hintmove 1.6s ease-in-out infinite;transition:opacity .6s;pointer-events:none}
   #hint.gone{opacity:0}
   @keyframes hintmove{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
-  @media (max-width:600px){#pbar .lbl{display:none}#hint{font-size:13px;bottom:70px}}
+  @media (max-width:600px){
+    #pbar .lbl{display:none}
+    #hint{font-size:13px;bottom:70px}
+    #tlBtn{bottom:64px;font-size:13px;padding:7px 14px}
+    .tl-nodes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .tl-nodes::before{display:none}
+    .tl-node{width:auto}
+    #tlSheet{max-height:52vh;overflow-y:auto}
+    .flo{width:44px}
+  }
 </style>
 </head>
 <body>
 <div id="scroll">
-<svg id="juan" viewBox="0 0 6700 900" preserveAspectRatio="xMinYMid meet" xmlns="http://www.w3.org/2000/svg">
+<svg id="juan" viewBox="0 0 7600 900" preserveAspectRatio="xMinYMid meet" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.22 0 0 0 0.05 0"/>
@@ -54,17 +126,18 @@
   </defs>
 
   <!-- ===== 东巴纸底 ===== -->
-  <rect x="0" y="0" width="6700" height="900" fill="var(--paper)"/>
-  <rect x="0" y="0" width="6700" height="900" fill="var(--paper)" filter="url(#grain)"/>
+  <rect x="0" y="0" width="7600" height="900" fill="var(--paper)"/>
+  <rect x="0" y="0" width="7600" height="900" fill="var(--paper)" filter="url(#grain)"/>
   <!-- 手卷上下撕边 -->
-  <path d="M0,0 H6700 V22 C6500,30 6300,14 6100,22 C5900,30 5700,16 5500,23 C5300,30 5100,15 4900,22 C4700,29 4500,16 4300,23 C4100,30 3900,14 3700,22 C3500,30 3300,17 3100,23 C2900,29 2700,15 2500,22 C2300,29 2100,16 1900,23 C1700,30 1500,14 1300,22 C1100,30 900,17 700,23 C500,29 300,16 100,23 L0,26 Z" fill="#d6c391"/>
-  <path d="M0,900 V874 C200,866 400,882 600,875 C800,868 1000,884 1200,876 C1400,868 1600,883 1800,875 C2000,867 2200,882 2400,876 C2600,868 2800,884 3000,876 C3200,868 3400,883 3600,875 C3800,867 4000,882 4200,876 C4400,868 4600,884 4800,876 C5000,868 5200,883 5400,875 C5600,867 5800,882 6000,876 C6200,868 6400,884 6600,876 L6700,874 V900 Z" fill="#d6c391"/>
+  <path d="M0,0 H7600 V22 C7400,30 7200,14 7000,22 C6800,30 6600,16 6400,23 C6200,30 6000,15 5800,22 C5600,29 5400,16 5200,23 C5000,30 4800,14 4600,22 C4400,30 4200,17 4000,23 C3800,29 3600,15 3400,22 C3200,29 3000,16 2800,23 C2600,30 2400,14 2200,22 C2000,30 1800,17 1600,23 C1400,29 1200,16 1000,23 C800,29 600,16 400,23 L0,26 Z" fill="#d6c391"/>
+  <path d="M0,900 V874 C200,866 400,882 600,875 C800,868 1000,884 1200,876 C1400,868 1600,883 1800,875 C2000,867 2200,882 2400,876 C2600,868 2800,884 3000,876 C3200,868 3400,883 3600,875 C3800,867 4000,882 4200,876 C4400,868 4600,884 4800,876 C5000,868 5200,883 5400,875 C5600,867 5800,882 6000,876 C6200,868 6400,884 6600,876 C6800,868 7000,884 7200,876 C7400,868 7550,880 7600,874 V900 Z" fill="#d6c391"/>
   <!-- 折痕（手卷分段） -->
   <g stroke="#c9b384" stroke-width="2" opacity="0.55">
     <line x1="820" y1="26" x2="820" y2="874"/><line x1="1640" y1="26" x2="1640" y2="874"/>
     <line x1="2460" y1="26" x2="2460" y2="874"/><line x1="3280" y1="26" x2="3280" y2="874"/>
     <line x1="4100" y1="26" x2="4100" y2="874"/><line x1="4920" y1="26" x2="4920" y2="874"/>
     <line x1="5740" y1="26" x2="5740" y2="874"/><line x1="6560" y1="26" x2="6560" y2="874"/>
+    <line x1="7380" y1="26" x2="7380" y2="874"/>
   </g>
   <!-- 纸纤维 -->
   <g stroke="#c4ae7f" stroke-width="1.4" opacity="0.5">
@@ -72,6 +145,7 @@
     <path d="M2900,780 q60,-10 130,6"/><path d="M3700,160 q70,12 140,-4"/><path d="M4500,770 q50,-12 120,4"/>
     <path d="M5300,150 q60,10 130,-4"/><path d="M6100,760 q70,-8 140,6"/><path d="M900,420 q50,8 110,-4"/>
     <path d="M5500,420 q60,-10 120,4"/><path d="M3300,420 q60,10 120,-4"/>
+    <path d="M6700,180 q60,-12 130,4"/><path d="M7000,760 q70,10 140,-6"/><path d="M7300,200 q50,10 120,-2"/>
   </g>
 
   <!-- ===== 卷首 ===== -->
@@ -102,16 +176,16 @@
     <image class="g" data-g="涌泉" x="596" y="520" width="64" height="64" opacity="0.85"/>
   </g>
 
-  <!-- ===== 红色迁徙之河（由细到粗） ===== -->
+  <!-- ===== 红色迁徙之河（加宽，由细到粗） ===== -->
   <g id="river" fill="none" stroke-linecap="round">
-    <path d="M640,575 C760,590 820,618 900,630" stroke="var(--cinnabar)" stroke-width="7" opacity="0.92"/>
-    <path d="M880,630 C1100,662 1400,650 1650,616 C1780,600 1860,580 1960,576" stroke="var(--cinnabar)" stroke-width="13" opacity="0.92"/>
-    <path d="M1930,576 C2200,570 2450,600 2700,626 C2850,640 2960,644 3060,640" stroke="var(--cinnabar)" stroke-width="19" opacity="0.92"/>
-    <path d="M3030,640 C3300,646 3600,610 3850,586 C3980,575 4060,572 4160,574" stroke="var(--cinnabar)" stroke-width="26" opacity="0.92"/>
-    <path d="M4130,574 C4400,570 4700,596 4950,618 C5080,630 5170,632 5260,628" stroke="var(--cinnabar)" stroke-width="34" opacity="0.92"/>
-    <path d="M5230,628 C5500,632 5800,610 6050,596 C6180,590 6260,592 6330,600" stroke="var(--cinnabar)" stroke-width="23" opacity="0.92"/>
+    <path d="M640,575 C760,590 820,618 900,630" stroke="var(--cinnabar)" stroke-width="10" opacity="0.92"/>
+    <path d="M880,630 C1100,662 1400,650 1650,616 C1780,600 1860,580 1960,576" stroke="var(--cinnabar)" stroke-width="18" opacity="0.92"/>
+    <path d="M1930,576 C2200,570 2450,600 2700,626 C2850,640 2960,644 3060,640" stroke="var(--cinnabar)" stroke-width="26" opacity="0.92"/>
+    <path d="M3030,640 C3300,646 3600,610 3850,586 C3980,575 4060,572 4160,574" stroke="var(--cinnabar)" stroke-width="36" opacity="0.92"/>
+    <path d="M4130,574 C4400,570 4700,596 4950,618 C5080,630 5170,632 5260,628" stroke="var(--cinnabar)" stroke-width="46" opacity="0.92"/>
+    <path d="M5230,628 C5500,632 5800,610 6050,596 C6180,590 6260,592 6330,600" stroke="var(--cinnabar)" stroke-width="32" opacity="0.92"/>
     <!-- 波光 -->
-    <g stroke="#e0927a" stroke-width="2.4" opacity="0.7">
+    <g stroke="#e0927a" stroke-width="3" opacity="0.7">
       <path d="M1000,640 q26,-8 52,0"/><path d="M1400,644 q26,-8 52,0"/><path d="M1800,596 q26,-8 52,0"/>
       <path d="M2300,600 q30,-9 60,0"/><path d="M2700,632 q30,-9 60,0"/><path d="M3200,644 q32,-10 64,0"/>
       <path d="M3600,608 q32,-10 64,0"/><path d="M4000,582 q32,-10 64,0"/><path d="M4500,592 q34,-10 68,0"/>
@@ -120,8 +194,8 @@
     </g>
     <!-- 年代刻度 -->
     <g fill="var(--cinnabar-deep)" font-size="22" letter-spacing="3">
-      <circle cx="900" cy="630" r="5"/><circle cx="1960" cy="576" r="5"/>
-      <circle cx="3060" cy="640" r="5"/><circle cx="4160" cy="574" r="5"/><circle cx="5260" cy="628" r="5"/>
+      <circle cx="900" cy="630" r="6.5"/><circle cx="1960" cy="576" r="6.5"/>
+      <circle cx="3060" cy="640" r="6.5"/><circle cx="4160" cy="574" r="6.5"/><circle cx="5260" cy="628" r="6.5"/>
     </g>
   </g>
   <!-- ===== 沿途装饰 ===== -->
@@ -147,9 +221,9 @@
     <text x="900" y="196" text-anchor="middle" font-size="30" fill="var(--ink-soft)" letter-spacing="5">第一站 · 火塘声波</text>
     <text x="900" y="264" text-anchor="middle" font-size="56" fill="var(--ink)" font-weight="700" letter-spacing="8">口传之魂</text>
     <rect x="660" y="146" width="46" height="46" rx="8" fill="var(--cinnabar)" opacity="0.92"/>
-    <image class="g seal-img" data-g="口" x="665" y="151" width="36" height="36"/>
+    <image class="g seal-img" data-g="口·白" x="665" y="151" width="36" height="36"/>
     <!-- 声波 -->
-    <g stroke="var(--ink)" stroke-width="4" fill="none" opacity="0.85">
+    <g class="wave" stroke="var(--ink)" stroke-width="4" fill="none" opacity="0.85">
       <path d="M838,346 q-26,24 0,66"/><path d="M812,332 q-40,38 0,94"/>
       <path d="M962,346 q26,24 0,66"/><path d="M988,332 q40,38 0,94"/>
     </g>
@@ -157,8 +231,10 @@
     <path d="M872,378 Q900,360 928,378 Q900,398 872,378 Z" fill="none" stroke="var(--cinnabar)" stroke-width="4.5"/>
     <path d="M872,378 L928,378" stroke="var(--cinnabar)" stroke-width="3.5"/>
     <!-- 火塘 -->
-    <path d="M900,396 C878,428 868,452 876,478 C884,502 916,502 924,478 C932,452 922,428 900,396 Z" fill="url(#flame)"/>
-    <path d="M900,436 C890,454 886,466 890,478 C894,490 906,490 910,478 C914,466 910,454 900,436 Z" fill="#f0c060"/>
+    <g class="flames">
+      <path d="M900,396 C878,428 868,452 876,478 C884,502 916,502 924,478 C932,452 922,428 900,396 Z" fill="url(#flame)"/>
+      <path d="M900,436 C890,454 886,466 890,478 C894,490 906,490 910,478 C914,466 910,454 900,436 Z" fill="#f0c060"/>
+    </g>
     <ellipse cx="856" cy="508" rx="24" ry="13" fill="#6b6f75"/>
     <ellipse cx="900" cy="518" rx="26" ry="13" fill="#585c62"/>
     <ellipse cx="944" cy="508" rx="24" ry="13" fill="#6b6f75"/>
@@ -170,7 +246,7 @@
     <text x="1960" y="196" text-anchor="middle" font-size="30" fill="var(--ink-soft)" letter-spacing="5">第二站 · 木石初痕</text>
     <text x="1960" y="264" text-anchor="middle" font-size="56" fill="var(--ink)" font-weight="700" letter-spacing="8">刀笔之始</text>
     <rect x="1720" y="146" width="46" height="46" rx="8" fill="var(--cinnabar)" opacity="0.92"/>
-    <image class="g seal-img" data-g="石" x="1725" y="151" width="36" height="36"/>
+    <image class="g seal-img" data-g="石·白" x="1725" y="151" width="36" height="36"/>
     <!-- 木板 -->
     <g transform="rotate(-4 1960 420)">
       <rect x="1848" y="322" width="224" height="196" rx="12" fill="#b08a5e" stroke="#7a5a38" stroke-width="5"/>
@@ -182,11 +258,14 @@
       <image class="g" data-g="人" x="1876" y="410" width="54" height="54"/>
       <image class="g" data-g="鸟" x="1946" y="412" width="54" height="54"/>
       <image class="g" data-g="林" x="2010" y="410" width="54" height="54"/>
+      <path class="carve-line" d="M1880,488 q42,10 84,2 q40,-8 76,4" fill="none" stroke="#5a3a22" stroke-width="4"/>
     </g>
     <!-- 竹笔 -->
-    <g transform="rotate(24 2120 430)">
-      <rect x="2112" y="330" width="11" height="120" rx="5" fill="#8a6a42"/>
-      <path d="M2112,450 L2123,450 L2117,494 Z" fill="#3a3a42"/>
+    <g class="pen">
+      <g transform="rotate(24 2120 430)">
+        <rect x="2112" y="330" width="11" height="120" rx="5" fill="#8a6a42"/>
+        <path d="M2112,450 L2123,450 L2117,494 Z" fill="#3a3a42"/>
+      </g>
     </g>
     <text x="1960" y="552" text-anchor="middle" font-size="24" fill="var(--ink-soft)" letter-spacing="4">约7—11世纪 · 木石与竹笔</text>
   </g>
@@ -196,19 +275,23 @@
     <text x="3060" y="196" text-anchor="middle" font-size="30" fill="var(--ink-soft)" letter-spacing="5">第三站 · 经卷仪礼</text>
     <text x="3060" y="264" text-anchor="middle" font-size="56" fill="var(--ink)" font-weight="700" letter-spacing="8">仪式之用</text>
     <rect x="2820" y="146" width="46" height="46" rx="8" fill="var(--cinnabar)" opacity="0.92"/>
-    <image class="g seal-img" data-g="经书" x="2825" y="151" width="36" height="36"/>
-    <!-- 摊开的经书 -->
-    <path d="M2928,356 L3054,372 L3054,506 L2928,490 Z" fill="#f6eed7" stroke="var(--ink)" stroke-width="4"/>
-    <path d="M3192,356 L3066,372 L3066,506 L3192,490 Z" fill="#f6eed7" stroke="var(--ink)" stroke-width="4"/>
+    <image class="g seal-img" data-g="经书·白" x="2825" y="151" width="36" height="36"/>
+    <!-- 摊开的经书（两页缓缓展开） -->
+    <g class="pgL">
+      <path d="M2928,356 L3054,372 L3054,506 L2928,490 Z" fill="#f6eed7" stroke="var(--ink)" stroke-width="4"/>
+      <image class="g" data-g="祈祷" x="2946" y="386" width="42" height="42"/>
+      <image class="g" data-g="东巴" x="2996" y="388" width="42" height="42"/>
+      <image class="g" data-g="人" x="2948" y="438" width="40" height="40"/>
+      <image class="g" data-g="纸" x="2996" y="440" width="40" height="40"/>
+    </g>
+    <g class="pgR">
+      <path d="M3192,356 L3066,372 L3066,506 L3192,490 Z" fill="#f6eed7" stroke="var(--ink)" stroke-width="4"/>
+      <image class="g" data-g="山" x="3082" y="386" width="42" height="42"/>
+      <image class="g" data-g="水" x="3132" y="388" width="42" height="42"/>
+      <image class="g" data-g="火" x="3084" y="438" width="40" height="40"/>
+      <image class="g" data-g="读" x="3132" y="440" width="40" height="40"/>
+    </g>
     <line x1="3060" y1="370" x2="3060" y2="508" stroke="var(--ink)" stroke-width="3"/>
-    <image class="g" data-g="祈祷" x="2946" y="386" width="42" height="42"/>
-    <image class="g" data-g="东巴" x="2996" y="388" width="42" height="42"/>
-    <image class="g" data-g="人" x="2948" y="438" width="40" height="40"/>
-    <image class="g" data-g="纸" x="2996" y="440" width="40" height="40"/>
-    <image class="g" data-g="山" x="3082" y="386" width="42" height="42"/>
-    <image class="g" data-g="水" x="3132" y="388" width="42" height="42"/>
-    <image class="g" data-g="火" x="3084" y="438" width="40" height="40"/>
-    <image class="g" data-g="读" x="3132" y="440" width="40" height="40"/>
     <!-- 五色旗幡 -->
     <line x1="3272" y1="300" x2="3272" y2="530" stroke="#6a4a2c" stroke-width="7"/>
     <path d="M3272,312 L3180,330" stroke="#6a4a2c" stroke-width="3"/>
@@ -225,14 +308,30 @@
     <text x="4160" y="196" text-anchor="middle" font-size="30" fill="var(--ink-soft)" letter-spacing="5">第四站 · 铅字学术</text>
     <text x="4160" y="264" text-anchor="middle" font-size="56" fill="var(--ink)" font-weight="700" letter-spacing="8">世界记忆</text>
     <rect x="3920" y="146" width="46" height="46" rx="8" fill="var(--cinnabar)" opacity="0.92"/>
-    <image class="g seal-img" data-g="读" x="3925" y="151" width="36" height="36"/>
-    <!-- 厚书（书脊朝外） -->
-    <rect x="4095" y="280" width="132" height="246" rx="10" fill="#2f4a6b" stroke="#1d2f47" stroke-width="4"/>
-    <line x1="4105" y1="312" x2="4217" y2="312" stroke="var(--gold)" stroke-width="3"/>
-    <line x1="4105" y1="504" x2="4217" y2="504" stroke="var(--gold)" stroke-width="3"/>
-    <g fill="#f2ede0" font-size="23" text-anchor="middle">
-      <text x="4161" y="352">纳</text><text x="4161" y="378">西</text><text x="4161" y="404">东</text>
-      <text x="4161" y="430">巴</text><text x="4161" y="456">古</text><text x="4161" y="482">籍</text>
+    <image class="g seal-img" data-g="读·白" x="3925" y="151" width="36" height="36"/>
+    <!-- 内页（封面翻开后露出） -->
+    <rect x="4095" y="280" width="132" height="246" rx="10" fill="#f6eed7" stroke="#c9b78c" stroke-width="3"/>
+    <g stroke="#b3a277" stroke-width="2">
+      <line x1="4112" y1="330" x2="4212" y2="330"/><line x1="4112" y1="360" x2="4212" y2="360"/>
+      <line x1="4112" y1="390" x2="4212" y2="390"/><line x1="4112" y1="420" x2="4212" y2="420"/>
+      <line x1="4112" y1="450" x2="4212" y2="450"/><line x1="4112" y1="480" x2="4212" y2="480"/>
+    </g>
+    <!-- 厚书封面（翻开动画） -->
+    <g class="cover">
+      <rect x="4095" y="280" width="132" height="246" rx="10" fill="#2f4a6b" stroke="#1d2f47" stroke-width="4"/>
+      <line x1="4105" y1="312" x2="4217" y2="312" stroke="var(--gold)" stroke-width="3"/>
+      <line x1="4105" y1="504" x2="4217" y2="504" stroke="var(--gold)" stroke-width="3"/>
+      <g fill="#f2ede0" font-size="23" text-anchor="middle">
+        <text x="4161" y="352">纳</text><text x="4161" y="378">西</text><text x="4161" y="404">东</text>
+        <text x="4161" y="430">巴</text><text x="4161" y="456">古</text><text x="4161" y="482">籍</text>
+      </g>
+    </g>
+    <!-- 飞出的文字 -->
+    <g class="fly" fill="var(--cinnabar)" font-size="26" text-anchor="middle" font-weight="700">
+      <text class="fly-t" x="4130" y="330" style="animation-delay:1.4s">纳</text>
+      <text class="fly-t" x="4162" y="314" style="animation-delay:1.9s">西</text>
+      <text class="fly-t" x="4194" y="330" style="animation-delay:2.4s">东</text>
+      <text class="fly-t" x="4162" y="346" style="animation-delay:2.9s">巴</text>
     </g>
     <!-- 书页侧 -->
     <rect x="4227" y="290" width="30" height="226" rx="4" fill="#f2ede0" stroke="#c9b78c" stroke-width="2"/>
@@ -252,20 +351,20 @@
     <text x="5260" y="196" text-anchor="middle" font-size="30" fill="var(--ink-soft)" letter-spacing="5">第五站 · 掌间像素</text>
     <text x="5260" y="264" text-anchor="middle" font-size="56" fill="var(--ink)" font-weight="700" letter-spacing="8">数字重生</text>
     <rect x="5020" y="146" width="46" height="46" rx="8" fill="var(--cinnabar)" opacity="0.92"/>
-    <image class="g seal-img" data-g="星" x="5025" y="151" width="36" height="36"/>
+    <image class="g seal-img" data-g="星·白" x="5025" y="151" width="36" height="36"/>
     <!-- 手机 -->
-    <rect x="5195" y="298" width="132" height="244" rx="22" fill="#26303c" stroke="#141a21" stroke-width="4"/>
-    <rect x="5208" y="318" width="106" height="196" rx="9" fill="#eef4f6"/>
+    <rect class="phone" x="5195" y="298" width="132" height="244" rx="22" fill="#26303c" stroke="#141a21" stroke-width="4"/>
+    <rect class="scr" x="5208" y="318" width="106" height="196" rx="9" fill="#26303c"/>
     <line x1="5241" y1="308" x2="5281" y2="308" stroke="#141a21" stroke-width="5" stroke-linecap="round"/>
-    <image class="g" data-g="爱" x="5222" y="344" width="80" height="80"/>
-    <g>
+    <image class="g love" data-g="爱" x="5222" y="344" width="80" height="80"/>
+    <g class="ui">
       <rect x="5222" y="446" width="13" height="13" fill="#d94f3d"/><rect x="5238" y="446" width="13" height="13" fill="#e0a53a"/>
       <rect x="5254" y="446" width="13" height="13" fill="#4c8a44"/><rect x="5270" y="446" width="13" height="13" fill="#3d6b9a"/>
       <rect x="5286" y="446" width="13" height="13" fill="#8a5aa0"/>
       <rect x="5230" y="463" width="13" height="13" fill="#3d6b9a"/><rect x="5246" y="463" width="13" height="13" fill="#d94f3d"/>
       <rect x="5262" y="463" width="13" height="13" fill="#8a5aa0"/><rect x="5278" y="463" width="13" height="13" fill="#4c8a44"/>
+      <text x="5261" y="506" text-anchor="middle" font-size="16" fill="#5a6b80">东巴学徒</text>
     </g>
-    <text x="5261" y="506" text-anchor="middle" font-size="16" fill="#5a6b80">东巴学徒</text>
     <!-- 拼豆 -->
     <g>
       <rect x="5130" y="480" width="16" height="16" rx="3" fill="#d94f3d" transform="rotate(14 5138 488)"/>
@@ -277,13 +376,22 @@
       <rect x="5420" y="548" width="16" height="16" rx="3" fill="#e0a53a" transform="rotate(24 5428 556)"/>
       <rect x="5110" y="544" width="16" height="16" rx="3" fill="#4c8a44" transform="rotate(-22 5118 552)"/>
     </g>
+    <!-- 游戏二维码卡 -->
+    <a href="https://xuz208276.github.io/dongba/" target="_blank">
+      <g class="qr">
+        <rect width="230" height="276" rx="12" fill="#f6efdc" stroke="var(--ink)" stroke-width="3.5"/>
+        <image class="g" data-g="QR" x="40" y="24" width="150" height="150"/>
+        <text x="115" y="210" text-anchor="middle" font-size="25" fill="var(--cinnabar-deep)" font-weight="700" letter-spacing="4">扫码即玩</text>
+        <text x="115" y="244" text-anchor="middle" font-size="17" fill="var(--ink-soft)" letter-spacing="2">东巴学徒 · 游戏学习</text>
+      </g>
+    </a>
     <text x="5260" y="592" text-anchor="middle" font-size="24" fill="var(--ink-soft)" letter-spacing="4">当代 · 小程序与拼豆</text>
   </g>
 
   <!-- ===== 支流 · 新芽 ===== -->
   <g class="st" id="sprout">
-    <path d="M6010,598 C6120,640 6260,668 6384,694" fill="none" stroke="var(--cinnabar)" stroke-width="5.5" stroke-linecap="round" opacity="0.92"/>
-    <g stroke="#e0927a" stroke-width="2" fill="none" opacity="0.75">
+    <path d="M6010,598 C6120,640 6260,668 6384,694" fill="none" stroke="var(--cinnabar)" stroke-width="8" stroke-linecap="round" opacity="0.92"/>
+    <g stroke="#e0927a" stroke-width="2.6" fill="none" opacity="0.75">
       <path d="M6340,700 q30,12 60,4"/><path d="M6330,712 q36,14 72,6"/><path d="M6350,688 q22,-8 44,-2"/>
     </g>
     <!-- 幼苗 -->
@@ -294,20 +402,109 @@
     <text x="6400" y="772" text-anchor="middle" font-size="42" fill="#3d6b34" font-weight="700" letter-spacing="10">新芽</text>
     <text x="6400" y="812" text-anchor="middle" font-size="22" fill="var(--ink-soft)" letter-spacing="4">生生不息 · 献给我们的团队</text>
   </g>
+
+  <!-- ===== 卷外 · 数字回声 ===== -->
+  <g class="st" id="echo">
+    <text x="7080" y="176" text-anchor="middle" font-size="28" fill="var(--ink-soft)" letter-spacing="6">卷外 · 数字回声</text>
+    <text x="7080" y="238" text-anchor="middle" font-size="50" fill="var(--ink)" font-weight="700" letter-spacing="8">古籍新生 · 云端相见</text>
+    <line x1="6820" y1="262" x2="7340" y2="262" stroke="var(--cinnabar)" stroke-width="2.5"/>
+
+    <!-- 卡 A · 1950 周汝诚抄本 -->
+    <a href="http://csj.nlc.cn/aboutus/" target="_blank">
+      <g class="card">
+        <rect x="6645" y="300" width="250" height="300" rx="12" fill="#f6efdc" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="6665" y="322" width="38" height="38" rx="7" fill="var(--cinnabar)"/>
+        <image class="g seal-img" data-g="写·白" x="6670" y="327" width="28" height="28"/>
+        <text x="6715" y="350" font-size="22" fill="var(--ink)" font-weight="700" letter-spacing="1">合璧抄本 · 1950</text>
+        <rect x="6665" y="374" width="210" height="84" rx="8" fill="none" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="7 6"/>
+        <text x="6770" y="408" text-anchor="middle" font-size="16" fill="var(--ink-soft)" letter-spacing="2">抄本书影 · 待补</text>
+        <text x="6770" y="434" text-anchor="middle" font-size="14" fill="var(--cinnabar-deep)" letter-spacing="1">点击前往国图鉴赏原貌</text>
+        <g font-size="16" fill="var(--ink-soft)" letter-spacing="1">
+          <text x="6665" y="486">周汝诚手写合璧《创世纪》</text>
+          <text x="6665" y="512">上端东巴文 · 下端汉译</text>
+          <text x="6665" y="538">赠中央民族访问团</text>
+          <text x="6665" y="564">今藏国家图书馆</text>
+        </g>
+        <text x="6665" y="590" font-size="15" fill="var(--cinnabar-deep)" font-weight="700" letter-spacing="1">前往国图知识库 →</text>
+      </g>
+    </a>
+
+    <!-- 卡 B · 识典古籍知识库 -->
+    <a href="https://www.shidianguji.com/chuangshiji?enter_from=shidian" target="_blank">
+      <g class="card">
+        <rect x="6955" y="300" width="250" height="300" rx="12" fill="#f6efdc" stroke="var(--ink)" stroke-width="3"/>
+        <image class="g" data-g="读" x="7082" y="452" width="96" height="96" opacity="0.1"/>
+        <rect x="6975" y="322" width="38" height="38" rx="7" fill="var(--cinnabar)"/>
+        <image class="g seal-img" data-g="读·白" x="6980" y="327" width="28" height="28"/>
+        <text x="7025" y="350" font-size="22" fill="var(--ink)" font-weight="700" letter-spacing="1">识典古籍知识库</text>
+        <g font-size="16" fill="var(--ink-soft)" letter-spacing="1">
+          <text x="6975" y="412">国图 × 字节跳动公益</text>
+          <text x="6975" y="444">2025 年上线 · 全球免费开放</text>
+          <text x="6975" y="476">文本导读 · 字词词典</text>
+          <text x="6975" y="508">东巴文专字检索</text>
+        </g>
+        <text x="6975" y="586" font-size="15" fill="var(--cinnabar-deep)" font-weight="700" letter-spacing="1">进入《创世纪》知识库 →</text>
+      </g>
+    </a>
+
+    <!-- 卡 C · 华东师大数字教程 -->
+    <a href="https://www.sinobook.com.cn/main/newsdetail.cfm?iCntno=114757" target="_blank">
+      <g class="card">
+        <rect x="7265" y="300" width="250" height="300" rx="12" fill="#f6efdc" stroke="var(--ink)" stroke-width="3"/>
+        <image class="g" data-g="笔" x="7392" y="452" width="96" height="96" opacity="0.1"/>
+        <rect x="7285" y="322" width="38" height="38" rx="7" fill="var(--cinnabar)"/>
+        <image class="g seal-img" data-g="笔·白" x="7290" y="327" width="28" height="28"/>
+        <text x="7335" y="350" font-size="22" fill="var(--ink)" font-weight="700" letter-spacing="1">在线数字教程</text>
+        <g font-size="16" fill="var(--ink-soft)" letter-spacing="1">
+          <text x="7285" y="400">华东师范大学出版社</text>
+          <text x="7285" y="428">《东巴象形文字初级教程》</text>
+          <text x="7285" y="456">木春燕 周爱民 李英 主编</text>
+          <text x="7285" y="484">近二百字 · 汉纳拼三对照</text>
+          <text x="7285" y="512">音视频 + 互动游戏</text>
+          <text x="7285" y="540">「海峡杯」数字出版二等奖</text>
+        </g>
+        <text x="7285" y="586" font-size="15" fill="var(--cinnabar-deep)" font-weight="700" letter-spacing="1">看报道 →</text>
+      </g>
+    </a>
+
+    <text x="7080" y="652" text-anchor="middle" font-size="15" fill="var(--ink-soft)" letter-spacing="2" opacity="0.85">书影与平台内容 © 国家图书馆 · 识典古籍 · 华东师范大学出版社 — 点击卡片前往各平台</text>
+  </g>
 </svg>
+<canvas id="flow" width="3800" height="450"></canvas>
 </div>
 <div id="pbar">
   <span class="lbl">创世纪 · 文化迁徙长卷</span>
   <div class="track" id="track"><div class="fill" id="fill"></div></div>
 </div>
 <div id="hint">向右徐徐展开 ⇢</div>
+<button id="tlBtn">✦ 史诗脉络</button>
+<div id="tlSheet">
+  <div class="tl-head"><span>《创世纪》史诗脉络</span><span id="tlClose">×</span></div>
+  <div class="tl-nodes">
+    <div class="tl-node"><span class="tl-img"><img data-g="天" alt="天"></span><b>开天辟地</b><p>混沌生万物<br>善恶始分</p></div>
+    <div class="tl-node"><span class="tl-img"><img data-g="洪水" alt="洪水"></span><b>洪水翻天</b><p>兄妹婚配 → 洪水滔天<br>崇忍利恩独存</p></div>
+    <div class="tl-node"><span class="tl-img"><img data-g="火炬" alt="火炬"></span><b>天上烽火</b><p>天女衬红褒白相助<br>过刀梯 · 砍森林 · 播山地</p></div>
+    <div class="tl-node"><span class="tl-img"><img data-g="一家" alt="一家"></span><b>迁徙人间</b><p>定居丽江<br>三子分衍：藏 · 纳西 · 白</p></div>
+  </div>
+</div>
+<img class="flo" data-g="云" style="left:3%;top:9%;--d:27s;--r:-10deg" alt="">
+<img class="flo" data-g="水" style="left:71%;top:7%;--d:24s;--r:9deg" alt="">
+<img class="flo" data-g="鸟" style="left:89%;top:20%;--d:22s;--r:8deg" alt="">
+<img class="flo" data-g="星" style="left:92%;top:60%;--d:30s;--r:12deg" alt="">
+<img class="flo" data-g="花" style="left:2.5%;top:64%;--d:25s;--r:-7deg" alt="">
+<img class="flo" data-g="草" style="left:30%;top:86%;--d:28s;--r:10deg" alt="">
 <script src="scroll-glyphs.js"></script>
 <script>
 (function(){
-  // 注入字图
+  // 注入字图（SVG image）
   document.querySelectorAll('image.g').forEach(function(im){
     var k = im.getAttribute('data-g');
     if (typeof GLYPHS !== 'undefined' && GLYPHS[k]) { im.setAttribute('href', GLYPHS[k]); im.setAttributeNS('http://www.w3.org/1999/xlink','href', GLYPHS[k]); }
+  });
+  // 注入字图（HTML img：漂浮字 + 时间线）
+  document.querySelectorAll('img[data-g]').forEach(function(im){
+    var k = im.getAttribute('data-g');
+    if (typeof GLYPHS !== 'undefined' && GLYPHS[k]) im.src = GLYPHS[k];
   });
 
   var sc = document.getElementById('scroll');
@@ -316,9 +513,10 @@
   // 站点锚点（viewBox 坐标 → 实际像素）
   var stops = [
     {x:0,    t:'卷首'}, {x:900, t:'火塘声波'}, {x:1960, t:'木石初痕'},
-    {x:3060, t:'经卷仪礼'}, {x:4160, t:'铅字学术'}, {x:5260, t:'掌间像素'}, {x:6400, t:'新芽'}
+    {x:3060, t:'经卷仪礼'}, {x:4160, t:'铅字学术'}, {x:5260, t:'掌间像素'},
+    {x:6400, t:'新芽'}, {x:7080, t:'数字回声'}
   ];
-  function scale(){ return svg.getBoundingClientRect().width / 6700; }
+  function scale(){ return svg.getBoundingClientRect().width / 7600; }
   function maxLeft(){ return sc.scrollWidth - sc.clientWidth; }
   function stopLeft(x){ return Math.max(0, Math.min(maxLeft(), x*scale() - sc.clientWidth/2 + 200)); }
 
@@ -331,6 +529,7 @@
     track.appendChild(d); return d;
   });
 
+  var hint = document.getElementById('hint');
   function onScroll(){
     var p = maxLeft() ? sc.scrollLeft/maxLeft() : 0;
     fill.style.width = (p*100) + '%';
@@ -364,7 +563,63 @@
   }, {root: sc, threshold: 0.25});
   document.querySelectorAll('.st').forEach(function(el){ io.observe(el); });
 
-  var hint = document.getElementById('hint');
+  // 时间线开关
+  var tlSheet = document.getElementById('tlSheet'), tlBtn = document.getElementById('tlBtn');
+  tlBtn.onclick = function(){ tlSheet.classList.toggle('open'); tlBtn.classList.toggle('off', tlSheet.classList.contains('open')); };
+  document.getElementById('tlClose').onclick = function(){ tlSheet.classList.remove('open'); tlBtn.classList.remove('off'); };
+
+  // ===== 红河流动粒子 =====
+  var cv = document.getElementById('flow'), ctx = cv.getContext('2d');
+  ctx.setTransform(0.5, 0, 0, 0.5, 0, 0);
+  function fitCanvas(){ var r = svg.getBoundingClientRect(); cv.style.width = r.width+'px'; cv.style.height = r.height+'px'; }
+  window.addEventListener('resize', fitCanvas); fitCanvas();
+
+  var main_line = [[640,575],[770,600],[900,630],[1200,652],[1650,616],[1960,576],[2300,585],[2700,626],[3060,640],[3450,620],[3850,586],[4160,574],[4550,585],[4950,618],[5260,628],[5650,618],[6050,596],[6330,600]];
+  var trib_line = [[6010,598],[6120,640],[6260,668],[6384,694]];
+  var wknots = [[640,10],[900,12],[1650,18],[1960,20],[2700,27],[3060,28],[3850,37],[4160,38],[4950,47],[5260,46],[6050,33],[6330,30]];
+  function build(path){ var segs=[], L=0;
+    for (var i=0;i<path.length-1;i++){ var a=path[i], b=path[i+1], l=Math.hypot(b[0]-a[0], b[1]-a[1]); segs.push({a:a,b:b,l:l,c:L}); L+=l; }
+    return {segs:segs, L:L};
+  }
+  var MAIN = build(main_line), TRIB = build(trib_line);
+  function widthAt(x){
+    for (var i=0;i<wknots.length-1;i++){ var p=wknots[i], q=wknots[i+1];
+      if (x<=q[0]){ var t=Math.max(0,Math.min(1,(x-p[0])/(q[0]-p[0]))); return p[1]+(q[1]-p[1])*t; } }
+    return 30;
+  }
+  function pointOn(bd, t){
+    var d = t*bd.L, s = bd.segs[bd.segs.length-1];
+    for (var i=0;i<bd.segs.length;i++){ if (d <= bd.segs[i].c + bd.segs[i].l){ s = bd.segs[i]; break; } }
+    var u = (d - s.c)/s.l;
+    return { x: s.a[0]+(s.b[0]-s.a[0])*u, y: s.a[1]+(s.b[1]-s.a[1])*u,
+             dx:(s.b[0]-s.a[0])/s.l, dy:(s.b[1]-s.a[1])/s.l };
+  }
+  var P = [];
+  for (var i=0;i<120;i++){
+    P.push({ t:Math.random(), sp:0.006+Math.random()*0.012, ph:Math.random()*6.28,
+             fr:0.5+Math.random()*1.2, r:1+Math.random()*2.6, tri:Math.random()<0.14, lite:Math.random()<0.62 });
+  }
+  var last = 0;
+  function frame(ts){
+    requestAnimationFrame(frame);
+    if (!last) last = ts;
+    var dt = Math.min(0.05, (ts-last)/1000); last = ts;
+    if (document.hidden) return;
+    ctx.clearRect(0, 0, 7600, 900);
+    for (var i=0;i<P.length;i++){ var p = P[i];
+      p.t += p.sp*dt; if (p.t > 1){ p.t -= 1; p.ph = Math.random()*6.28; }
+      var q = pointOn(p.tri ? TRIB : MAIN, p.t);
+      var w = p.tri ? 9 : widthAt(q.x);
+      var off = Math.sin(ts/1000*p.fr + p.ph) * w * 0.36;
+      var x = q.x - q.dy*off, y = q.y + q.dx*off;
+      var a = (0.14 + 0.5*Math.sin(Math.PI*p.t)) * (p.lite ? 1 : 0.85);
+      ctx.strokeStyle = p.lite ? ('rgba(238,175,140,'+a+')') : ('rgba(122,32,20,'+(a*0.8)+')');
+      ctx.lineWidth = p.r; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x-q.dx*6, y-q.dy*6); ctx.lineTo(x+q.dx*6, y+q.dy*6); ctx.stroke();
+    }
+  }
+  requestAnimationFrame(frame);
+
   onScroll();
 })();
 </script>
